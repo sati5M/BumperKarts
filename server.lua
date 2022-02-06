@@ -58,9 +58,11 @@ end)
 
 RegisterNetEvent("bumperkart:BumperKartStart")
 AddEventHandler("bumperkart:BumperKartStart", function()
+    local source = source
     if not gameOnGoing then
         gameOnGoing = true
         startGame()
+        TriggerClientEvent("bumperkart:tensecondcountdown", source)
         Citizen.Wait(cfg.gameSettings.timeToPlayGame * 1000)
         endGame()
     end

@@ -1,4 +1,5 @@
 local timeLeft = 30
+local tenCountdown = 30
 local pedCreated = false
 
 function alert(msg) 
@@ -64,6 +65,29 @@ Citizen.CreateThread(function()
     end
 end)
 
+RegisterNetEvent("bumperkart:tensecondcountdown")
+AddEventHandler("bumperkart:tensecondcountdown", function()
+    tenCountdown = cfg.gameSettings.timeToPlayGame
+    while true do
+        if tenCountdown <= cfg.gameSettings.timeToPlayGame and tenCountdown >= 10 then
+            DrawRect(0.944, 0.886, 0.17, 0.032, 0, 0, 0, 150)
+            DrawAdvancedNativeText(1.0, 0.892, 0.005, 0.0028, 0.29, "TIME REMAINING:", 255, 255, 255, 255, 0, 0)
+            DrawAdvancedNativeText(1.06, 0.885, 0.005, 0.0028, 0.464, "00:" .. tostring(tenCountdown), 255, 255, 255, 255, 0, 0)
+        end
+        if tenCountdown <= cfg.gameSettings.timeToPlayGame and tenCountdown < 10 then
+            DrawRect(0.944, 0.886, 0.17, 0.032, 0, 0, 0, 150)
+            DrawAdvancedNativeText(1.0, 0.892, 0.005, 0.0028, 0.29, "TIME REMAINING:", 255, 255, 255, 255, 0, 0)
+            DrawAdvancedNativeText(1.06, 0.885, 0.005, 0.0028, 0.464, "00:0" .. tostring(tenCountdown), 255, 255, 255, 255, 0, 0)
+        end
+
+        if tenCountdown == 0 then
+            break
+        end
+        Wait(0)
+       
+    end
+end)
+
 Citizen.CreateThread(function()
     timeLeft = 0
     while true do
@@ -74,6 +98,17 @@ Citizen.CreateThread(function()
         Wait(1000)
     end
     
+end)
+
+Citizen.CreateThread(function()
+    tenCountdown = 0
+    while true do
+        while tenCountdown > 0 do
+            tenCountdown = tenCountdown - 1
+            Wait(1000)
+        end
+        Wait(1000)
+    end
 end)
 
 RegisterNetEvent("bumperkart:SlotsFilled")

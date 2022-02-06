@@ -21,7 +21,7 @@ cfg.bumperKarts = {
 }
 
 cfg.gameSettings = {
-    queueTimer = 10, -- SECONDS
+    queueTimer = 3, -- SECONDS  
     timeToPlayGame = 60, -- SECONDS
     spawnLocAfterGame = vector3(-1732.5638427734,-1116.8132324219,13.017228126526)
 
