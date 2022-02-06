@@ -1,7 +1,5 @@
-local ticketMasterNetId = nil
 local timeLeft = 30
-local number = 0
-local alerted = false
+local pedCreated = false
 
 function alert(msg) 
     SetTextComponentFormat("STRING")
@@ -15,8 +13,8 @@ function notify(string)
     DrawNotification(true, false)
 end
 
-function clientSetPedInvis(netId)
-    local ped = NetworkGetEntityFromNetworkId(netId)
+function clientSetPedInvis(pedId)
+    local ped = pedId
     FreezeEntityPosition(ped, true)
     SetEntityInvincible(ped, true)
     SetBlockingOfNonTemporaryEvents(ped, true)
@@ -31,13 +29,24 @@ function DrawAdvancedNativeText(x,y,w,h,sc, text, r,g,b,a,font,jus)
 	DrawText(x - 0.1+w, y - 0.02+h)
 end
 
-
+Citizen.CreateThread(function()
+    while not HasModelLoaded(cfg.ticketMaster.ped) do
+        RequestModel(cfg.ticketMaster.ped)
+        Wait(0)
+    end
+    if not pedCreated then
+        local ped = CreatePed(1, cfg.ticketMaster.ped, cfg.ticketMaster.location, 45.0, false, true)
+        SetEntityAsMissionEntity(ped, true, true)
+        clientSetPedInvis(ped)
+        pedCreated = true
+    end 
+end)
 
 Citizen.CreateThread(function()   
     local sleep = 1000
-    local ped = PlayerPedId()
-    
+
     while true do
+        local ped = PlayerPedId()
         local pedCoords = GetEntityCoords(ped)
         if #(pedCoords - cfg.ticketMaster.markerLocation) < 10 then
             sleep = 0
@@ -45,22 +54,20 @@ Citizen.CreateThread(function()
             if #(pedCoords - cfg.ticketMaster.markerLocation) < 2 then
                 alert("Press ~INPUT_CONTEXT~ to join Bumper Karts!")
                 if IsControlJustPressed(1, 51) then
-                    TriggerServerEvent("Server:updateTable")
+                    TriggerServerEvent("bumperkart:updateTable")
                 end
             end
         else
             sleep = 1000
         end
-        
         Wait(sleep)
     end
-   
 end)
 
 Citizen.CreateThread(function()
     timeLeft = 0
     while true do
-        while timeLeft > number do
+        while timeLeft > 0 do
             timeLeft = timeLeft - 1
             Citizen.Wait(1000)
         end
@@ -69,43 +76,33 @@ Citizen.CreateThread(function()
     
 end)
 
-RegisterNetEvent("Client:createPed")
-AddEventHandler("Client:createPed", function(netId)
-    ticketMasterNetId = netId
-    clientSetPedInvis(netId)
-end)
-
-RegisterNetEvent("onResourceStop")
-AddEventHandler("onResourceStop", function(resourcename)
-    if GetCurrentResourceName() == resourcename then
-        if ticketMasterNetId ~= nil then
-            DeletePed(NetworkGetEntityFromNetworkId(ticketMasterNetId))
-        end
-    end
-end)
-
-RegisterNetEvent("Client:SlotsFilled")
-AddEventHandler("Client:SlotsFilled", function()
+RegisterNetEvent("bumperkart:SlotsFilled")
+AddEventHandler("bumperkart:SlotsFilled", function()
     notify("~r~No space available")
 end)
 
-RegisterNetEvent("Client:alreadyInQueue")
-AddEventHandler("Client:alreadyInQueue", function()
+RegisterNetEvent("bumperkart:alreadyInQueue")
+AddEventHandler("bumperkart:alreadyInQueue", function()
     notify("~r~You are already in the queue.")
 end)
 
-RegisterNetEvent("Client:GameOngoing")
-AddEventHandler("Client:GameOngoing", function()
+RegisterNetEvent("bumperkart:GameOngoing")
+AddEventHandler("bumperkart:GameOngoing", function()
     notify("~r~There is currently a game ongoing.")
 end)
 
-RegisterNetEvent("Client:NotEnoughPlayers")
-AddEventHandler("Client:NotEnoughPlayers", function()
+RegisterNetEvent("bumperkart:NotEnoughPlayers")
+AddEventHandler("bumperkart:NotEnoughPlayers", function()
     notify("~r~Not enough players to start the game.")
 end)
 
-RegisterNetEvent("Client:JoinedQueue")
-AddEventHandler("Client:JoinedQueue", function(timer)
+RegisterNetEvent("bumperkart:gameover")
+AddEventHandler("bumperkart:gameover", function()
+    notify("~g~Your game has now finished.")
+end)
+
+RegisterNetEvent("bumperkart:JoinedQueue")
+AddEventHandler("bumperkart:JoinedQueue", function(timer)
     notify("~g~You have joined the queue.")
     timeLeft = timer
     while true do
@@ -127,15 +124,15 @@ end)
 
 
 
-RegisterNetEvent("Client:BumperKartStarted")
-AddEventHandler("Client:BumperKartStarted", function()
+RegisterNetEvent("bumperkart:BumperKartStarted")
+AddEventHandler("bumperkart:BumperKartStarted", function()
     notify("~g~Game starting in 3")
     Citizen.Wait(1000)
     notify("~g~Game starting in 2")
     Citizen.Wait(1000)
     notify("~g~Game starting in 1")
     Citizen.Wait(1000)
-    TriggerServerEvent("Server:BumperKartStart")
+    TriggerServerEvent("bumperkart:BumperKartStart")
     while not HasModelLoaded(cfg.bumperKarts.vehicleModel) do 
         RequestModel(cfg.bumperKarts.vehicleModel)
         Wait(0) 

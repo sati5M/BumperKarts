@@ -7,41 +7,30 @@ local timer = cfg.gameSettings.queueTimer
 local index = 1
 local players = 1
 
-RegisterNetEvent("onServerResourceStart")
-AddEventHandler("onServerResourceStart", function(resourcename)
-    if GetCurrentResourceName() == resourcename and not pedCreated then
-        local ped = CreatePed(1, cfg.ticketMaster.ped, cfg.ticketMaster.location, 45.0, true, true)
-        local netId = NetworkGetNetworkIdFromEntity(ped)
-        Citizen.Wait(500)
-        pedCreated = true
-        TriggerClientEvent("Client:createPed", -1, netId)
-    end  
-end)
-
-RegisterNetEvent("Server:updateTable")
-AddEventHandler("Server:updateTable", function()
+RegisterNetEvent("bumperkart:updateTable")
+AddEventHandler("bumperkart:updateTable", function()
     local source = source
     local playersQueued = tablelength(playerQueue)
 
     if gameOnGoing then
-        TriggerClientEvent("Client:GameOngoing", source)
+        TriggerClientEvent("bumperkart:GameOngoing", source)
         return
     end
     
     if playersQueued > 0 then
         for k, v in pairs(playerQueue) do
             if v.tempid == source then
-                TriggerClientEvent("Client:alreadyInQueue", source)
+                TriggerClientEvent("bumperkart:alreadyInQueue", source)
                 return false
             end
         end
 
         if playersQueued >= cfg.maxPlayers then
-            TriggerClientEvent("Client:SlotsFilled", source)
+            TriggerClientEvent("bumperkart:SlotsFilled", source)
             return false
         else
             
-        TriggerClientEvent("Client:JoinedQueue", source, timer)
+        TriggerClientEvent("bumperkart:JoinedQueue", source, timer)
         playerQueue[index] = {tempid = source}
         index = index + 1
         if not countdownOnGoing then
@@ -53,7 +42,7 @@ AddEventHandler("Server:updateTable", function()
         end
         end
     else
-        TriggerClientEvent("Client:JoinedQueue", source, timer)
+        TriggerClientEvent("bumperkart:JoinedQueue", source, timer)
         playerQueue[index] = {tempid = source}
         index = index + 1
         if not countdownOnGoing then
@@ -67,8 +56,8 @@ AddEventHandler("Server:updateTable", function()
     end
 end)
 
-RegisterNetEvent("Server:BumperKartStart")
-AddEventHandler("Server:BumperKartStart", function()
+RegisterNetEvent("bumperkart:BumperKartStart")
+AddEventHandler("bumperkart:BumperKartStart", function()
     if not gameOnGoing then
         gameOnGoing = true
         startGame()
@@ -104,6 +93,7 @@ function endGame()
             if DoesEntityExist(NetworkGetEntityFromNetworkId(v.netId)) then
                 DeleteEntity(NetworkGetEntityFromNetworkId(v.netId))
                 SetEntityCoords(GetPlayerPed(v.tempid), cfg.gameSettings.spawnLocAfterGame, false, false, true, true)
+                TriggerClientEvent("bumperkart:gameover", v.tempid)
             end
         end
     end
@@ -135,7 +125,7 @@ function startCountdown()
                 break
             else
                 players = players + 1
-                TriggerClientEvent("Client:BumperKartStarted", playerQueue[i].tempid)
+                TriggerClientEvent("bumperkart:BumperKartStarted", playerQueue[i].tempid)
             end
         end        
     else
@@ -144,7 +134,7 @@ function startCountdown()
             Wait(500)
         end
         for k, v in pairs(playerQueue) do
-            TriggerClientEvent("Client:NotEnoughPlayers", playerQueue[k].tempid)
+            TriggerClientEvent("bumperkart:NotEnoughPlayers", playerQueue[k].tempid)
             timer = 5
             end
         end

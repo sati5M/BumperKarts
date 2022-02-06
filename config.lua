@@ -5,7 +5,7 @@ cfg.maxPlayers = 5
 
 cfg.ticketMaster = {
     ped = `a_m_m_fatlatin_01`,
-    location = vector3(-1721.669921875,-1125.4945068359,14.114929199219),
+    location = vector3(-1721.669921875,-1125.4945068359,13.114929199219),
     markerLocation = vector3(-1722.4866943359,-1124.8459472656,13.134929199219)
 }
 
@@ -22,7 +22,7 @@ cfg.bumperKarts = {
 
 cfg.gameSettings = {
     queueTimer = 10, -- SECONDS
-    timeToPlayGame = 20, -- SECONDS
+    timeToPlayGame = 60, -- SECONDS
     spawnLocAfterGame = vector3(-1732.5638427734,-1116.8132324219,13.017228126526)
 
 }
